@@ -1,0 +1,29 @@
+name: Juicebox
+version: '${version}'
+main: app.bishan.juicebox.JuiceboxPlugin
+api-version: 1.19
+authors: [ bishan_, _nahsib ]
+website: bishan.app
+
+permissions:
+  juicebox.command:
+    description: "Allows the player to use the /juicebox command"
+    default: true
+
+  juicebox.feature_control:
+    description: "Allows the player to use the /juicebox feature command"
+    default: op
+
+  juicebox.chest_locking.locking:
+    description: "Allows the player to use the /juicebox feature chest_locking command"
+    default: true
+
+  juicebox.chest_locking.override:
+    description: "Allows the player to override chest locking"
+    default: op
+
+commands:
+  juicebox:
+    description: "Juicebox command"
+    aliases: [ jb ]
+    permission: juicebox.command
