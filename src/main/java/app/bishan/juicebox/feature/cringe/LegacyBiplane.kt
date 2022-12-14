@@ -3,6 +3,7 @@ package app.bishan.juicebox.feature.cringe
 import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.*
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -28,7 +29,8 @@ object LegacyBiplane : Feature("legacy_biplane", true) {
 	private val BOAT_LAST_AIR_LOCATION_Y get() = NamespacedKey(JuiceboxPlugin.instance, "lastAirLocationY")
 	private val BOAT_CRASH get() = NamespacedKey(JuiceboxPlugin.instance, "crash")
 	private val BOAT_ROLL get() = NamespacedKey(JuiceboxPlugin.instance, "roll")
-	private const val BOAT_SPEED = 10.0
+
+	private const val BOAT_SPEED = 17.0
 	private const val BOAT_PITCH_SPEED = 0.33f
 	private const val BOAT_MAX_PITCH = 90f
 
@@ -123,14 +125,6 @@ object LegacyBiplane : Feature("legacy_biplane", true) {
 		vehicle != null && isNPC(passenger) && vehicle.type == EntityType.CHEST_BOAT && (vehicle as ChestBoat).boatType == Boat.Type.MANGROVE
 
 	@EventHandler
-	private fun onInteract(ev: PlayerInteractAtEntityEvent) {
-		if (ev.rightClicked.type != EntityType.PLAYER) return
-		if (!isNPC(ev.rightClicked)) return
-
-		ev.player.sendTitle("atlanta spelt backwards is", "is still atlanta", 10, 70, 20)
-	}
-
-	@EventHandler
 	private fun onVehicleEnter(ev: VehicleEnterEvent) {
 		if (!isNPCBoat(ev.entered, ev.vehicle)) return
 		ev.vehicle.setGravity(false)
@@ -201,6 +195,16 @@ object LegacyBiplane : Feature("legacy_biplane", true) {
 		val turnStrength = (ev.to.yaw - ev.from.yaw) / Math.PI
 		val roll = sigmoidSigned(turnStrength) * BOAT_ROLL_ANGLE_MAX
 		boat.persistentDataContainer.setDouble(BOAT_ROLL, roll)
+	}
+
+	@EventHandler
+	private fun onEquipElytra(ev: PlayerArmorChangeEvent) {
+		if (!isEntityUUID(ev.player, PlayersUUID.BISHAN)) return
+		if (ev.newItem?.type == Material.ELYTRA) {
+			val chest = ev.player.equipment.chestplate
+			ev.player.world.dropItemNaturally(ev.player.location, chest)
+			chest.subtract()
+		}
 	}
 
 	private fun isNPC(player: Entity) = isEntityUUID(player, PlayersUUID.BISHAN)

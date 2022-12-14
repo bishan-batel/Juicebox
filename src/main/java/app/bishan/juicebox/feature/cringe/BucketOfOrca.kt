@@ -4,7 +4,11 @@ import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.*
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.util.TriState
+import net.minecraft.core.HolderSet.Named
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Entity
@@ -15,8 +19,9 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
+import kotlin.math.truncate
 
-object BucketOfOrca : Feature("bucket_of_orca", true) {
+object BucketOfOrca : Feature("bucket_of_orca", false) {
 	private val KEY_ORCA_BUCKET get() = JuiceboxPlugin.key("has_orca")
 	const val ORCA_DIMENSION_NAME = "world_orca_prison"
 	const val GENERATOR_SETTINGS = """{
@@ -25,9 +30,47 @@ object BucketOfOrca : Feature("bucket_of_orca", true) {
 }
 """
 
+	override fun onEnable() {
+		addCommand("delete_orcas_prison", { sender, args ->
+			if (args.isEmpty() || args[0] != "confirm") {
+				sender.sendMessage(
+					Component.text("Are you sure you want to delete the orca's prison realm?\nIf so, run: \n")
+						.color(NamedTextColor.RED).append(
+							Component.text("/juicebox delete_orcas_prison confirm").color(NamedTextColor.GOLD)
+						)
+				)
+				return@addCommand true
+			}
+
+			sender.sendMessage(
+				Component.text("Deleting orca prison...").color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC)
+			)
+
+			val startTime = System.currentTimeMillis()
+
+			// unloads world
+			if (Bukkit.unloadWorld(ORCA_DIMENSION_NAME, false))
+				sender.sendMessage(
+					Component.text("Unloaded orca prison").color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC)
+				)
+
+			val worldFolder = Bukkit.getWorldContainer().resolve(ORCA_DIMENSION_NAME)
+			if (worldFolder.exists()) {
+				worldFolder.deleteRecursively()
+				val time = truncate((System.currentTimeMillis() - startTime) / 1000.0 * 100) / 100
+				sender.sendMessage(Component.text("Deleted orca prison in $time seconds").color(NamedTextColor.GREEN))
+				true
+			} else {
+				sender.sendMessage(Component.text("Orca prison does not exist").color(NamedTextColor.RED))
+				false
+			}
+		})
+	}
+
 	private fun waterDimension(): World {
 		val existingWorld = Bukkit.getWorld(ORCA_DIMENSION_NAME)
 		if (existingWorld != null) return existingWorld
+
 
 		// json object
 //		generator.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
@@ -46,6 +89,7 @@ object BucketOfOrca : Feature("bucket_of_orca", true) {
 		wc.generateStructures(false)
 		wc.type(WorldType.FLAT)
 		wc.generatorSettings(GENERATOR_SETTINGS)
+		wc.keepSpawnLoaded(TriState.FALSE)
 		val world = Bukkit.getServer().createWorld(wc)!!
 		world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true)
 		world.setStorm(true)
@@ -124,7 +168,7 @@ object BucketOfOrca : Feature("bucket_of_orca", true) {
 
 		ent = stack[0]
 		for (i in 1 until stack.size) {
-			ent.addPassenger(stack[i])
+			if (stack[i] != ent) ent.addPassenger(stack[i])
 			ent = stack[i]
 		}
 

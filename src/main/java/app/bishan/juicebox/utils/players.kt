@@ -14,4 +14,5 @@ object PlayersUUID {
 	val JAD: UUID = UUID.fromString("005a15ee-a668-4449-88a3-fef550dc4788")
 	val BISHAN: UUID = UUID.fromString("6aaf2d0c-db1c-4529-b363-aef8af010dcf")
 	val BEE: UUID = UUID.fromString("eabf8a53-1a3f-44ce-b605-d545ab952218")
+	val RENI: UUID = UUID.fromString("42e9adac-7053-4897-9203-ef8a4bc01413")
 }

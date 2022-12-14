@@ -3,7 +3,6 @@ package app.bishan.juicebox.feature.lock
 import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.*
-import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
@@ -14,7 +13,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockExplodeEvent
-import org.bukkit.event.block.BlockPistonEvent
 import org.bukkit.event.block.BlockPistonExtendEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
@@ -265,7 +263,12 @@ object ChestLocking : Feature("chest_locking", true) {
 		}
 
 		val placer = chest.persistentDataContainer.getString(CHEST_PLACER)
-		if (placer != null || sender.uniqueId != UUID.fromString(placer)) {
+		if (placer == null) {
+			sender.sendMessage(Component.text("This chest was not placed by a player").color(NamedTextColor.RED))
+			return null
+		}
+
+		if (sender.uniqueId != UUID.fromString(placer)) {
 			sender.sendMessage(Component.text("You do not own this chest").color(NamedTextColor.RED))
 			return null
 		}

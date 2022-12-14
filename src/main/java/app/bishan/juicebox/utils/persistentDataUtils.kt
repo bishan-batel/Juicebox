@@ -5,6 +5,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 
+fun PersistentDataContainer.missingFlag(key: NamespacedKey) = !hasFlag(key)
 fun PersistentDataContainer.hasFlag(key: NamespacedKey): Boolean =
 	getOrDefault(key, PersistentDataType.BYTE, 0) != 0.toByte()
 

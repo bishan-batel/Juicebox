@@ -1,11 +1,15 @@
 name: Juicebox
-version: '${version}'
+version: '1.7.0-SNAPSHOT'
 main: app.bishan.juicebox.JuiceboxPlugin
 api-version: 1.19
 authors: [ bishan_, _nahsib ]
 website: bishan.app
 
 permissions:
+  juicebox.headpat:
+    description: "Allowed to headpat others"
+    default: true
+
   juicebox.command:
     description: "Allows the player to use the /juicebox command"
     default: true
@@ -21,6 +25,14 @@ permissions:
   juicebox.chest_locking.override:
     description: "Allows the player to override chest locking"
     default: op
+
+  juicebox.curse:
+    description: "Allows the player to use the /juicebox curse command"
+    default: true
+
+  juicebox.pack:
+    description: "Allows the player to use the /juicebox pack command"
+    default: true
 
 commands:
   juicebox:

@@ -4,13 +4,18 @@ import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.cmd.JuiceboxSubCommand
 import app.bishan.juicebox.cmd.JuiceboxTabCompleter
 import app.bishan.juicebox.feature.cringe.*
-import app.bishan.juicebox.feature.lock.ChestLocking
-import app.bishan.juicebox.feature.lore.JesusGoose
-import app.bishan.juicebox.feature.lore.VolaCrystal
-import app.bishan.juicebox.feature.lore.VolaImmunity
-import app.bishan.juicebox.feature.qol.CheapRenaming
+import app.bishan.juicebox.feature.deco.fish.FishBowl
+import app.bishan.juicebox.feature.emotions.HeadPat
+import app.bishan.juicebox.feature.lock.*
+import app.bishan.juicebox.feature.lore.*
+import app.bishan.juicebox.feature.qol.*
+import app.bishan.juicebox.feature.real.EndReactor
+import app.bishan.juicebox.feature.real.bank.BellBank
+import app.bishan.juicebox.feature.real.food.Coffee
+import app.bishan.juicebox.feature.real.friendly_fox.FriendlyFox
 import app.bishan.juicebox.feature.vehicle.*
 import app.bishan.juicebox.utils.giveItem
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
@@ -24,8 +29,15 @@ abstract class Feature(name: String, defaultActive: Boolean = false) : Listener 
 	companion object {
 		val allFeatures = arrayOf(
 			BucketOfOrca,
+			Coffee,
+			ResourcePack,
+			CBT,
+			BugNet,
+			TheFog,
+			BackpackShulkers,
 			MooMilk,
 			WaterMunch,
+			NPC,
 			Vehicles,
 			TotemGift,
 			FishingVox,
@@ -42,8 +54,16 @@ abstract class Feature(name: String, defaultActive: Boolean = false) : Listener 
 			LegacyVolaHelm,
 			JesusGoose,
 			CheapRenaming,
-			LittleGuy
-		).associateBy { it.name }
+			LittleGuy,
+			EndReactor,
+			FishBowl,
+			CustomTags,
+			CursedVision,
+			FriendlyFox,
+			HeadPat,
+			BellBank,
+			Sleigh,
+		).distinct().associateBy { it.name }
 
 		fun saveFeaturesActive() {
 			val file = File(JuiceboxPlugin.instance.dataFolder, "features.yml")
@@ -60,16 +80,15 @@ abstract class Feature(name: String, defaultActive: Boolean = false) : Listener 
 
 		fun loadFeaturesActive() {
 			val file = File(JuiceboxPlugin.instance.dataFolder, "features.yml")
-			if (!file.exists()) return
 
 			val yaml = Yaml()
-			val features = yaml.load<Map<String, Boolean>>(file.reader()) ?: mapOf()
+			val features = if (file.exists()) yaml.load<Map<String, Boolean>>(file.reader()) ?: mapOf() else mapOf()
 
-			features.forEach { (name, active) ->
-				val feature = allFeatures[name]
-				if (feature != null) {
-					if (active) feature.enable(false) else feature.disable(false)
-				}
+			for ((name, feat) in allFeatures) {
+				val activate = features[name] ?: feat.defaultActive
+				Bukkit.broadcast(Component.text("Loading feature $name: $activate"))
+				if (activate)
+					feat.enable(false)
 			}
 		}
 	}

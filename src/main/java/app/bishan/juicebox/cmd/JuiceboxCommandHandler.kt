@@ -24,12 +24,28 @@ class JuiceboxCommandHandler : CommandExecutor, TabCompleter {
 
 	init {
 		registerCommand("feature", ::featureSubCommand, ::featureSubCommandTabCompleter)
+		registerCommand("listActiveFeatures", ::listActiveFeaturesSubCommand, null)
+	}
+
+	private fun listActiveFeaturesSubCommand(sender: CommandSender, args: Array<out String>): Boolean {
+		val activeFeatures = Feature.allFeatures.filter { it.value.isActive() }.keys
+
+		if (activeFeatures.isEmpty()) {
+			sender.sendMessage(Component.text("No active features").color(TextColor.color(0xFF0000)))
+			return true
+		}
+
+		sender.sendMessage(Component.text("Active features:").color(TextColor.color(0x00FF00)))
+		for (feature in activeFeatures) {
+			sender.sendMessage(Component.text(" - $feature").color(TextColor.color(0x00FF00)))
+		}
+		return true
 	}
 
 	@Suppress("UNUSED_PARAMETER")
 	private fun featureSubCommandTabCompleter(commandSender: CommandSender, strings: Array<out String>): List<String> {
 		return when (strings.size) {
-			1 -> Feature.allFeatures.keys.toList()
+			1 -> Feature.allFeatures.keys.toList().filter { it.startsWith(strings.first()) }
 			2 -> listOf("enable", "disable")
 			else -> emptyList()
 		}
