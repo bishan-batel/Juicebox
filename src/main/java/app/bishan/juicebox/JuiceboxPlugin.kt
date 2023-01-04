@@ -2,20 +2,22 @@ package app.bishan.juicebox
 
 import app.bishan.juicebox.cmd.JuiceboxCommandHandler
 import app.bishan.juicebox.feature.Feature
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
+import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.plugin.java.JavaPlugin
 
 class JuiceboxPlugin : JavaPlugin() {
 	companion object {
 		val instance get() = Bukkit.getServer().pluginManager.getPlugin("Juicebox") as JuiceboxPlugin
 		fun key(name: String) = NamespacedKey(instance, name)
+		fun fixedMeta(value: Any) = FixedMetadataValue(instance, value)
 	}
 
 	val jbCmdHandler = JuiceboxCommandHandler()
 
 	override fun onEnable() {
+		saveDefaultConfig()
 		dataFolder.mkdirs()
 		// activate all features that are activated by default
 		Feature.loadFeaturesActive()

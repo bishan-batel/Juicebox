@@ -10,8 +10,18 @@ plugins {
 	id("org.jetbrains.kotlin.jvm") version "1.5.31"
 }
 
+repositories {
+	mavenCentral()
+
+	// include essentialsx-releases
+//	maven {
+//		name = "essentialsx-releases"
+//		url = uri("https://repo.essentialsx.net/releases/")
+//	}
+}
+
 group = "app.bishan.juicebox"
-version = "1.7.0-SNAPSHOT"
+version = "1.9"
 description = "Test plugin for paperweight-userdev"
 
 java {
@@ -31,14 +41,12 @@ dependencies {
 	// (paperDevBundle and paperweightDevBundle functions do not work in groovy)
 	// paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.19.2-R0.1-SNAPSHOT")
 
-	// Shadow will include the runtimeClasspath by default, which implementation adds to.
-	// Dependencies you don't want to include go in the compileOnly configuration.
-	// Make sure to relocate shaded dependencies!
-//	implementation("cloud.commandframework", "cloud-paper", "1.7.1")
 
 	// kotlin
 	implementation("org.jetbrains.kotlin", "kotlin-stdlib", "1.5.31")
 	implementation("org.jetbrains.kotlin", "kotlin-reflect", "1.5.31")
+
+	implementation("org.javacord:javacord:3.7.0")
 }
 
 // kotlin

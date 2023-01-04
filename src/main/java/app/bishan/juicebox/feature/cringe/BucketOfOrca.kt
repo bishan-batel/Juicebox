@@ -5,10 +5,8 @@ import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.util.TriState
-import net.minecraft.core.HolderSet.Named
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Entity
@@ -23,8 +21,8 @@ import kotlin.math.truncate
 
 object BucketOfOrca : Feature("bucket_of_orca", false) {
 	private val KEY_ORCA_BUCKET get() = JuiceboxPlugin.key("has_orca")
-	const val ORCA_DIMENSION_NAME = "world_orca_prison"
-	const val GENERATOR_SETTINGS = """{
+	private const val ORCA_DIMENSION_NAME = "world_orca_prison"
+	private const val GENERATOR_SETTINGS = """{
 			 "layers": [{"block":"air","height":64},{"block":"cyan_concrete","height":1}, {"block": "water", "height": 3}],
 			 "biome":"minecraft:bamboo_jungle"
 }

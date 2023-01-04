@@ -2,37 +2,46 @@ package app.bishan.juicebox.feature.lore
 
 import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.PlayersUUID
-import app.bishan.juicebox.utils.isEntityUUID
-import io.papermc.paper.event.player.PlayerPurchaseEvent
+import app.bishan.juicebox.utils.Scheduler
+import app.bishan.juicebox.utils.notEntity
+import io.papermc.paper.event.player.AsyncChatEvent
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
-import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.MerchantRecipe
 
-object NPC : Feature("npc", false) {
-//	@EventHandler
-//	fun onInteract(ev: PlayerInteractEntityEvent) {
-//		if (!isEntityUUID(ev.rightClicked, PlayersUUID.BISHAN)) return
-//
-//		val player = ev.player
-//
-//		val inv = Bukkit.createMerchant(Component.text("Bishan's Wares"))
-//		inv.recipes = listOf(run {
-//			val bishan = ev.rightClicked as Player
-//			val result = bishan.inventory.itemInMainHand
-//			if (result.type == Material.AIR) return
-//			val recipe = BishanRecipe(bishan, result, 1)
-//			recipe.addIngredient(ItemStack(Material.EMERALD, 10))
-//			recipe.maxUses = 1
-//			recipe.setIgnoreDiscounts(true)
-//			recipe
-//		})
-//		player.openMerchant(inv, true)
-//	}
-//
-//	class BishanRecipe(val bishan: Player, stack: ItemStack, maxUses: Int) : MerchantRecipe(stack, maxUses)
+object NPC : Feature("npc", true) {
+	override val description: Component
+		get() = Component.text("NPC Behaviour")
+
+	private const val DEVIL_GUN_MODE = "Press all buttons to activate Devil Gun Mode"
+	private val DEVIL_GUN_SFX = NamespacedKey("minecraft", "npc.devil_gun_mode")
+
+	@EventHandler
+	private fun onChat(ev: AsyncChatEvent) {
+		if (ev.player notEntity PlayersUUID.BISHAN) return
+
+		val msg = ev.originalMessage()
+		if (msg.toString().contains(DEVIL_GUN_MODE, true)) {
+			Scheduler.defer {
+				devilGunMode(ev.player)
+			}
+		}
+	}
+
+	private fun devilGunMode(player: Player) {
+		player.world.playSound(
+			Sound.sound(
+				DEVIL_GUN_SFX,
+				Sound.Source.MASTER,
+				1.0f,
+				1.0f
+			),
+			player.location.x,
+			player.location.y,
+			player.location.z,
+		)
+//		player.world.stopSound(SoundStop.named(DEVIL_GUN_SFX))
+	}
 }

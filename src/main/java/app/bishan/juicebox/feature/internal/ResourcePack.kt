@@ -1,12 +1,12 @@
-package app.bishan.juicebox.feature
+package app.bishan.juicebox.feature.internal
 
 import app.bishan.juicebox.JuiceboxPlugin
+import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.hasFlag
 import app.bishan.juicebox.utils.lowerFlag
 import app.bishan.juicebox.utils.raiseFlag
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -16,18 +16,17 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-object ResourcePack : Feature("juicepack", true) {
+object ResourcePack : Feature("internal:resource_pack", true, Scope.INTERNAL) {
+	val NO_TEXTURE_MESSAGE = listOf(
+		Component.text(""),
+		Component.text("If you can't see the texture,", NamedTextColor.DARK_GRAY),
+		Component.text("do /jb resource_pack", NamedTextColor.DARK_GRAY)
+	)
 	private val REQUIRE_RESOURCE_PACK = JuiceboxPlugin.key("require-resource-pack")
-	private var updateTask = -1
 	private var juiceboxHash = ""
 
 	override fun onEnable() {
 		addCommand("resource_pack", this::pack, null, "juicebox.pack")
-
-//		updateTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(
-//			JuiceboxPlugin.instance, fun() {
-//			}, 0L, 20 * 60 * 30
-//		)
 	}
 
 	@EventHandler
@@ -75,4 +74,6 @@ object ResourcePack : Feature("juicepack", true) {
 			)
 		}
 	}
+
+	public fun hasJuiceboxPack(player: Player) = player.persistentDataContainer.hasFlag(REQUIRE_RESOURCE_PACK)
 }

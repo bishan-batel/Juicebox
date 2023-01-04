@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.block.Container
+import org.bukkit.block.DoubleChest
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -183,6 +184,10 @@ object ChestLocking : Feature("chest_locking", true) {
 
 		// raise lock flag
 		chest.persistentDataContainer.raiseFlag(CHEST_LOCKED)
+
+		if (chest is DoubleChest) {
+
+		}
 		chest.update()
 
 		sender.sendMessage(Component.text("Locked chest").color(NamedTextColor.GREEN))

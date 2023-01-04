@@ -28,7 +28,7 @@ object VolaCrystal : Feature("vola_crystal", true) {
 	}
 
 	override fun onEnable() {
-		addGiveItemCommand("crystal", TAMER_CRYSTAL)
+		addCustomItem("crystal", TAMER_CRYSTAL)
 	}
 
 	// when a player clicks on an entity, then the player will start riding the entity

@@ -1,5 +1,5 @@
 name: Juicebox
-version: '1.7.0-SNAPSHOT'
+version: '1.9'
 main: app.bishan.juicebox.JuiceboxPlugin
 api-version: 1.19
 authors: [ bishan_, _nahsib ]

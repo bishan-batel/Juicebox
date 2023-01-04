@@ -12,15 +12,4 @@ import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Recipe
 
 object Coffee : Feature("coffee", false) {
-	override fun onEnable() {
-
-	}
-
-	@EventHandler
-	private fun onPotionPlace(ev: InventoryClickEvent) {
-		val brewingInventory = ev.clickedInventory ?: return
-		if (brewingInventory.type != InventoryType.BREWING) return
-
-		Bukkit.broadcast(Component.text("bruh: ${ev.currentItem}"))
-	}
 }

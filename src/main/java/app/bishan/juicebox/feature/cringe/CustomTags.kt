@@ -2,6 +2,7 @@ package app.bishan.juicebox.feature.cringe
 
 import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.PlayersUUID
+import app.bishan.juicebox.utils.isEntity
 import app.bishan.juicebox.utils.isEntityUUID
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -13,6 +14,7 @@ import org.bukkit.scoreboard.Team
 object CustomTags : Feature("custom_tags", true) {
 	private const val VIP_TEAM = "vip"
 	private const val TALL_GLASS_TEAM = "tall_glass_team"
+	private const val PURPS = "lavande_purps"
 
 	@EventHandler
 	fun onPlayerJoin(ev: PlayerJoinEvent) {
@@ -20,20 +22,18 @@ object CustomTags : Feature("custom_tags", true) {
 
 		(if (isEntityUUID(player, PlayersUUID.WATER_MUNCH)) {
 			tallGlassTeam()
-		} else if (isEntityUUID(player, PlayersUUID.RENI)) {
+		} else if (isEntityUUID(player, PlayersUUID.RENI) || player isEntity PlayersUUID.LAVANDE) {
 			vipTeam()
-		} else {
-			null
-		})?.addPlayer(player)
+		} else null)?.addPlayer(player)
 	}
 
 	private fun tallGlassTeam(): Team {
 		val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
 
-		val existing = scoreboard.getTeam(TALL_GLASS_TEAM)
+		val existing = scoreboard.getTeam(PURPS)
 		if (existing != null) return existing
 
-		val team = scoreboard.registerNewTeam(TALL_GLASS_TEAM)
+		val team = scoreboard.registerNewTeam(PURPS)
 		team.color(NamedTextColor.BLUE)
 		team.prefix(Component.text("[tall glass of] ", NamedTextColor.BLUE))
 		return team

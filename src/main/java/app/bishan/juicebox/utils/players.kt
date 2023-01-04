@@ -2,7 +2,6 @@ package app.bishan.juicebox.utils
 
 import java.util.*
 
-
 object PlayersUUID {
 	val ORCAS: UUID = UUID.fromString("5bed6e52-b103-4056-86dd-f59683eba2ae")
 	val NAHSIB: UUID = UUID.fromString("701d281e-8109-409a-aa6e-4981dabceb52")
@@ -15,4 +14,5 @@ object PlayersUUID {
 	val BISHAN: UUID = UUID.fromString("6aaf2d0c-db1c-4529-b363-aef8af010dcf")
 	val BEE: UUID = UUID.fromString("eabf8a53-1a3f-44ce-b605-d545ab952218")
 	val RENI: UUID = UUID.fromString("42e9adac-7053-4897-9203-ef8a4bc01413")
+	val LAVANDE: UUID = UUID.fromString("ecaba84c-cf20-46e7-aa50-fe90084584ee")
 }

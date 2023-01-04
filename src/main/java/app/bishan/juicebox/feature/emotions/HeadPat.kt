@@ -2,10 +2,7 @@ package app.bishan.juicebox.feature.emotions
 
 import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
-import app.bishan.juicebox.utils.getLong
-import app.bishan.juicebox.utils.hasFlag
-import app.bishan.juicebox.utils.setFlag
-import app.bishan.juicebox.utils.setLong
+import app.bishan.juicebox.utils.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
@@ -26,6 +23,11 @@ object HeadPat : Feature("headpat", true) {
 	private fun toggleHeadpat(sender: CommandSender, args: Array<out String>): Boolean {
 		if (sender !is Player) {
 			sender.sendMessage("Must be a player!")
+			return false
+		}
+
+		if (args.isNotEmpty()) {
+			sender.sendMessage("Too many arguments! (${args.size} > 0)")
 			return false
 		}
 
@@ -51,7 +53,7 @@ object HeadPat : Feature("headpat", true) {
 			return listOf()
 		}
 
-		val names = Bukkit.getOnlinePlayers().filterNot { it == sender }.map { it.name }
+		val names = getAllUnvanishedPlayers().filterNot { it == sender }.map { it.name }
 		if (args.isEmpty()) return names
 		return names.filter { it.startsWith(args.first()) }
 	}
@@ -63,7 +65,8 @@ object HeadPat : Feature("headpat", true) {
 		}
 
 		val player = Bukkit.getPlayer(args[0])
-		if (player == null || !player.isOnline) {
+
+		if (player == null || !player.isOnline || player !in getAllUnvanishedPlayers()) {
 			sender.sendMessage(Component.text("${args[0]} is not online!", NamedTextColor.RED))
 			return false
 		}

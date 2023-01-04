@@ -195,4 +195,17 @@ object BackpackShulkers : Feature("backpack_shulkers", false) {
 			ev.player.closeInventory()
 		}
 	}
+
+	@EventHandler
+	fun onShulkerClickInInventory(ev: InventoryClickEvent) {
+		val player = ev.whoClicked
+		if (!player.persistentDataContainer.hasFlag(OPEN_BACKPACK)) return
+
+		val shulkerItem = ev.currentItem ?: return
+		val shulker = (shulkerItem.itemMeta as? BlockStateMeta)?.blockState as? ShulkerBox ?: return
+
+		if (shulker.inventory.contents.contentEquals(player.openInventory.topInventory.contents)) {
+			ev.isCancelled = true
+		}
+	}
 }

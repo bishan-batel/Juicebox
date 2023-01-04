@@ -2,44 +2,52 @@ package app.bishan.juicebox.feature.cringe
 
 import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
+import app.bishan.juicebox.feature.internal.ResourcePack
+import app.bishan.juicebox.feature.internal.WanderingRecipe
 import app.bishan.juicebox.utils.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import net.minecraft.network.protocol.game.ClientboundAnimatePacket
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.enchantments.EnchantmentWrapper
 import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
-import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import java.util.*
+import kotlin.math.sqrt
 
 object BugNet : Feature("bug_net", true) {
 	private val IS_BUGNET get() = JuiceboxPlugin.key("IsBugnet")
 	private val BUGNET_CAPTURE get() = JuiceboxPlugin.key("bugnet_capture_uuid")
 	private const val THROW_PARTICLE_LIFE = 1000
 	private const val NET_COOLDOWN_TICKS = 15
-	private const val EXPERIENCE_COST_COOLDOWN = 4
+	private const val EXPERIENCE_COST_COOLDOWN = 2
+	private const val LAUNCH_SPEED = 1.1
+
+	private val BUGNET = ItemStack(Material.GOLDEN_SWORD).apply {
+		itemMeta = itemMeta.apply {
+			persistentDataContainer.raiseFlag(IS_BUGNET)
+			displayName(
+				Component.text("Orcas Bug Net", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false)
+			)
+			lore(
+				listOf(
+					Component.text("Right click a mob to capture it!", NamedTextColor.GRAY)
+						.decoration(TextDecoration.ITALIC, false),
+				) + ResourcePack.NO_TEXTURE_MESSAGE
+			)
+		}
+		addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+	}
+	private val BUGNET_TRADE = WanderingRecipe(BUGNET, 1).chance(0.01 * 0.1).minTemp(.25).maxTemp(.901)
 
 	override fun onEnable() {
-		addGiveItemCommand("bug_net", run {
-			val item = ItemStack(Material.STONE_SWORD)
-			item.itemMeta = item.itemMeta.apply {
-				persistentDataContainer.raiseFlag(IS_BUGNET)
-				displayName(Component.text("Orca's Bug Net", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false))
-			}
-			item.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
-			item
-		})
-	}
-
-	override fun onDisable() {
+		addCustomItem("bug_net", BUGNET)
+		addWanderingTrade(BUGNET_TRADE)
 	}
 
 	@EventHandler
@@ -58,7 +66,9 @@ object BugNet : Feature("bug_net", true) {
 			persistentDataContainer.remove(BUGNET_CAPTURE)
 			displayName(displayName()!!.color(NamedTextColor.BLUE))
 		}
-		captured.velocity = player.location.direction.multiply(1.5)
+
+		val launchSpeed = sqrt(net.getEnchantmentLevel(Enchantment.KNOCKBACK) + 1.0) * LAUNCH_SPEED
+		captured.velocity = player.location.direction.multiply(launchSpeed)
 		player.world.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1f, 0.6f)
 
 		val startTime = System.currentTimeMillis()
@@ -91,7 +101,11 @@ object BugNet : Feature("bug_net", true) {
 			player.level--
 			net.itemMeta = net.itemMeta.apply {
 				val item = this as? Damageable ?: return@apply
-				item.damage++
+
+				val unbreaking = item.getEnchantLevel(Enchantment.DURABILITY)
+				if (Math.random() < 1.0 / (unbreaking + 1)) {
+					item.damage++
+				}
 			}
 		}
 		player.world.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1f, 1f)
@@ -104,6 +118,8 @@ object BugNet : Feature("bug_net", true) {
 			persistentDataContainer.setString(BUGNET_CAPTURE, ent.uniqueId.toString())
 			displayName(displayName()!!.color(NamedTextColor.GREEN))
 		}
+
+		ent.fireTicks += net.getEnchantmentLevel(Enchantment.FIRE_ASPECT) * 100
 
 		var task = -1
 		var count = 0

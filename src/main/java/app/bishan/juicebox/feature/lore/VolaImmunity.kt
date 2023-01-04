@@ -4,7 +4,6 @@ import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.PlayersUUID
 import app.bishan.juicebox.utils.isEntityUUID
 import io.papermc.paper.event.entity.WardenAngerChangeEvent
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.Sound

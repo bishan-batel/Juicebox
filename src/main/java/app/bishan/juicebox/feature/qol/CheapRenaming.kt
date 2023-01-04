@@ -29,14 +29,10 @@ object CheapRenaming : Feature("cheap_renaming", true) {
 		if (inv.renameText == null) return
 		inv.repairCost = 1
 		inv.repairCostAmount = 1
-		inv.result = inv.firstItem?.clone()?.apply {
-			itemMeta = itemMeta?.apply {
-				displayName(Component.text(inv.renameText!!))
-			}
-		}
 	}
 
 	private fun monitorForRepairCost(inv: AnvilInventory) {
+		updateRepairCost(inv)
 		monitoringAnvils[inv] = Bukkit.getScheduler().scheduleSyncRepeatingTask(
 			JuiceboxPlugin.instance, fun() {
 				updateRepairCost(inv)

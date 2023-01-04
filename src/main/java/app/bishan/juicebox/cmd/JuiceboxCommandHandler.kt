@@ -3,6 +3,7 @@ package app.bishan.juicebox.cmd
 import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -13,11 +14,12 @@ import org.bukkit.command.TabCompleter
 typealias JuiceboxSubCommand = (sender: CommandSender, args: Array<out String>) -> Boolean
 typealias JuiceboxTabCompleter = (sender: CommandSender, args: Array<out String>) -> List<String>
 
-data class JuiceboxCommand(val cmd: JuiceboxSubCommand, val tab: JuiceboxTabCompleter?, val permission: String)
 
 class JuiceboxCommandHandler : CommandExecutor, TabCompleter {
 	companion object {
 		const val DEFAULT_PERMISSION = "juicebox.feature_control"
+
+		data class JuiceboxCommand(val cmd: JuiceboxSubCommand, val tab: JuiceboxTabCompleter?, val permission: String)
 	}
 
 	private var handlers: MutableMap<String, JuiceboxCommand> = HashMap()
@@ -28,57 +30,98 @@ class JuiceboxCommandHandler : CommandExecutor, TabCompleter {
 	}
 
 	private fun listActiveFeaturesSubCommand(sender: CommandSender, args: Array<out String>): Boolean {
-		val activeFeatures = Feature.allFeatures.filter { it.value.isActive() }.keys
+		val activeFeatures = Feature.allFeatures.filter { it.value.isActive() }.keys.sorted()
 
 		if (activeFeatures.isEmpty()) {
 			sender.sendMessage(Component.text("No active features").color(TextColor.color(0xFF0000)))
 			return true
 		}
 
-		sender.sendMessage(Component.text("Active features:").color(TextColor.color(0x00FF00)))
-		for (feature in activeFeatures) {
-			sender.sendMessage(Component.text(" - $feature").color(TextColor.color(0x00FF00)))
+		sender.sendMessage(Component.text("Active features:").color(NamedTextColor.GREEN))
+		for ((i, feature) in activeFeatures.withIndex()) {
+			sender.sendMessage(
+				Component.text(" - $feature").color(
+					if (i % 2 == 0) NamedTextColor.GRAY else NamedTextColor.WHITE
+				)
+			)
 		}
 		return true
 	}
 
 	@Suppress("UNUSED_PARAMETER")
-	private fun featureSubCommandTabCompleter(commandSender: CommandSender, strings: Array<out String>): List<String> {
-		return when (strings.size) {
-			1 -> Feature.allFeatures.keys.toList().filter { it.startsWith(strings.first()) }
-			2 -> listOf("enable", "disable")
+	private fun featureSubCommandTabCompleter(sender: CommandSender, args: Array<out String>): List<String> {
+		return when (args.size) {
+			1 -> Feature.allFeatures.filterValues { it.scope != Feature.Scope.INTERNAL }.keys.toList()
+
+			2 -> listOf("help", "status", "enable", "disable", "reload")
 			else -> emptyList()
-		}
+		}.filter { it.startsWith(args.lastOrNull() ?: "") }
 	}
 
-	private fun featureSubCommand(commandSender: CommandSender, args: Array<out String>): Boolean {
+	private fun featureSubCommand(sender: CommandSender, args: Array<out String>): Boolean {
 		if (args.isEmpty()) {
-			return false
+			// print out all features
+			sender.sendMessage(Component.text("Available features:").color(NamedTextColor.GREEN))
+			for (feature in Feature.allFeatures) {
+				sender.sendMessage(
+					Component.text(" - ${feature.key}").color(
+						if (feature.value.isActive()) NamedTextColor.GREEN else NamedTextColor.RED
+					)
+				)
+			}
+			return true
 		}
 
 		val featureName = args[0]
 		val feature = JuiceboxPlugin.instance.getFeature(featureName)
 
 		if (feature == null) {
-			commandSender.sendMessage("Feature $featureName does not exist")
+			sender.sendMessage("Feature $featureName does not exist")
+			return false
+		}
+
+		if (feature.scope == Feature.Scope.INTERNAL) {
+			sender.sendMessage("Feature $featureName is internal, cannot modify")
 			return false
 		}
 
 		if (args.size < 2) {
-			val state = if (feature.isActive()) "${ChatColor.GREEN}enabled" else "${ChatColor.RED}disabled"
-			commandSender.sendMessage("Feature $featureName is $state")
+			sender.sendMessage("Usage: /feature $featureName <enable|disable|reload|status>")
 			return true
 		}
 
 		when (args[1]) {
 			"enable" -> {
 				JuiceboxPlugin.instance.activateFeature(featureName, feature)
-				commandSender.sendMessage("Feature $featureName had been ${ChatColor.GREEN}enabled")
+				sender.sendMessage("Feature $featureName had been ${ChatColor.GREEN}enabled")
 			}
 
 			"disable" -> {
 				JuiceboxPlugin.instance.deactivateFeature(featureName, feature)
-				commandSender.sendMessage("Feature $featureName has been ${ChatColor.RED}disabled")
+				sender.sendMessage("Feature $featureName has been ${ChatColor.RED}disabled")
+			}
+
+			"reload" -> {
+				sender.sendMessage("Reloading Feature $featureName...")
+
+				JuiceboxPlugin.instance.deactivateFeature(featureName, feature)
+				JuiceboxPlugin.instance.activateFeature(featureName, feature)
+
+				sender.sendMessage("Feature $featureName has been ${ChatColor.GREEN}reloaded")
+			}
+
+			"status" -> {
+				val state = if (feature.isActive()) "${ChatColor.GREEN}enabled" else "${ChatColor.RED}disabled"
+				sender.sendMessage("Feature $featureName is $state")
+			}
+
+			"help" -> {
+				sender.sendMessage(Component.text {
+					it.append(Component.text("Feature $featureName", NamedTextColor.GREEN))
+					it.append(Component.newline())
+					it.append(feature.description)
+					it.append(Component.newline())
+				})
 			}
 
 			else -> {
@@ -106,7 +149,7 @@ class JuiceboxCommandHandler : CommandExecutor, TabCompleter {
 			handler.cmd(sender, subArgs)
 		} else {
 			sender.sendMessage(
-				Component.text("You do not have permission to use this command").color(TextColor.color(0xFF0000))
+				Component.text("You do not have permission to use this command").color(NamedTextColor.RED)
 			)
 			false
 		}
@@ -117,9 +160,9 @@ class JuiceboxCommandHandler : CommandExecutor, TabCompleter {
 	): MutableList<String>? {
 		if (args.isEmpty()) return null
 
-		if (args.size == 1)
-			return handlers.filter { it.key.startsWith(args[0]) && sender.hasPermission(it.value.permission) }
-				.keys.toMutableList()
+		if (args.size == 1) return handlers.filter {
+			it.key.startsWith(args[0]) && sender.hasPermission(it.value.permission)
+		}.keys.filter { !it.startsWith("hidden:") }.toMutableList()
 
 		val subCommand = args[0]
 		val subArgs = args.copyOfRange(1, args.size)

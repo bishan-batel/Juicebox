@@ -1,0 +1,22 @@
+features:
+  internal:juice_bot:
+    # bot token
+    token: "<bot token>"
+
+    # discord server id
+    serverId: "<server id>"
+
+    # How long a player can be on the server without having a linked discord account
+    # The default is 24 hours (1000 * 60 * 60 * 24)
+    # (this is in milliseconds)
+    # warnTime: 86400000
+
+  hypothermia:
+    # how many ticks until the player hits the max hypothermia
+    freezingSpeed: 2000
+
+    # max light level for the player to be able to get hypothermia
+    maxColdLightLevel: 4
+
+    # max block temperature that counts as a hypothermia-eligible block
+    maxColdTemperature: 0.1

@@ -1,6 +1,5 @@
 package app.bishan.juicebox.feature.cringe
 
-import app.bishan.juicebox.JuiceboxPlugin
 import app.bishan.juicebox.feature.Feature
 import app.bishan.juicebox.utils.PlayersUUID
 import app.bishan.juicebox.utils.isEntityUUID
@@ -8,8 +7,6 @@ import org.bukkit.BanList
 import org.bukkit.Bukkit
 import org.bukkit.EntityEffect
 import org.bukkit.Material
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.inventory.ItemStack
@@ -23,7 +20,7 @@ object FunnyStick : Feature("funny_stick", true) {
 	}
 
 	override fun onEnable() {
-		addGiveItemCommand("funny_stick", BAN_STICK)
+		addCustomItem("funny_stick", BAN_STICK)
 	}
 
 	@EventHandler
